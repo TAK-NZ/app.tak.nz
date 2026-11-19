@@ -5,6 +5,10 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+  # The landing page takes its header, menu and footer from https://tak.nz at
+  # build time, so rebuild weekly to follow changes to the website
+  schedule:
+    - cron: "17 16 * * 1"
 
 permissions:
   contents: read

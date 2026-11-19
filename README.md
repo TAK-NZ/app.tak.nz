@@ -4,7 +4,7 @@ The server list and landing page for the TAK.NZ mobile app, published with GitHu
 
 | URL | What it is |
 |---|---|
-| `https://app.tak.nz/` | Landing page (store links will go here) |
+| `https://app.tak.nz/` | Landing page, styled as part of tak.nz (store links will go here) |
 | `https://app.tak.nz/v1/servers.json` | The list of servers the app offers on first run |
 
 ## Why this exists
@@ -52,6 +52,24 @@ Whoever can merge here decides where users sign in, so a bad entry is a phishing
 ```
 
 This matches the format of upstream CloudTAK's registry, so the app reads it unchanged. Installed apps keep calling `/v1/` for years, so never change the meaning of this file. A breaking change goes in a new `/v2/` and `/v1/` keeps being served.
+
+## Keeping the landing page in step with tak.nz
+
+Visitors should not notice they have left <https://tak.nz>, so the landing page does not carry its own design:
+
+- The **header, mobile menu and footer** are copied from the live tak.nz home page at build time (`scripts/site.mjs`), so a new menu item or footer link on the website shows up here on the next build.
+- The **stylesheet, scripts, fonts, logo, icons, photo and hero video** are loaded from tak.nz itself.
+- Only the page content is written here, in `site/index.template.html`.
+
+The site is rebuilt on every push, weekly (Mondays), and on demand from the Actions tab. To pick up a website change at once, run the workflow manually.
+
+If tak.nz changes shape so that its header, menu or footer can no longer be found, the build **fails** and the last published page stays online. Fix `scripts/site.mjs` when that happens. `scripts/fixtures/taknz-home.html` is a saved copy of those blocks for the tests. Refresh it if the website's markup changes.
+
+To build without network access, point `TAKNZ_PAGE` at a saved copy of the tak.nz home page:
+
+```bash
+TAKNZ_PAGE=scripts/fixtures/taknz-home.html npm run build
+```
 
 ## Hosting
 

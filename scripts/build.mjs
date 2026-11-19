@@ -3,7 +3,8 @@
  * Build the site into dist/:
  *
  *   dist/v1/servers.json   the server list the TAK.NZ mobile app reads
- *   dist/...               everything under site/ (landing page, favicon)
+ *   dist/index.html        the landing page, with the tak.nz header and footer
+ *   dist/...               everything else under site/ (favicon)
  *
  * servers.json in the repo root is the file people edit. It references each logo
  * by path; this script validates the entries and inlines the logos as base64,
@@ -12,6 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { extractChrome, fetchSitePage, render } from './site.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -107,7 +109,7 @@ export function generate(source, readFile = (p) => fs.readFileSync(path.join(ROO
     };
 }
 
-function main() {
+async function main() {
     const source = JSON.parse(fs.readFileSync(path.join(ROOT, 'servers.json'), 'utf8'));
     const errors = validate(source);
     if (errors.length) {
@@ -116,15 +118,34 @@ function main() {
         process.exit(1);
     }
 
+    // The landing page borrows tak.nz's header, menu and footer. TAKNZ_PAGE
+    // points at a saved copy of the tak.nz home page, for building offline
+    const taknz = process.env.TAKNZ_PAGE
+        ? fs.readFileSync(path.resolve(process.env.TAKNZ_PAGE), 'utf8')
+        : await fetchSitePage();
+    const page = render(
+        fs.readFileSync(path.join(ROOT, 'site', 'index.template.html'), 'utf8'),
+        extractChrome(taknz),
+    );
+
     const dist = path.join(ROOT, 'dist');
     fs.rmSync(dist, { recursive: true, force: true });
-    fs.cpSync(path.join(ROOT, 'site'), dist, { recursive: true });
+    fs.cpSync(path.join(ROOT, 'site'), dist, {
+        recursive: true,
+        filter: (src) => !src.endsWith('index.template.html'),
+    });
+    fs.writeFileSync(path.join(dist, 'index.html'), page);
     fs.mkdirSync(path.join(dist, 'v1'), { recursive: true });
     fs.writeFileSync(path.join(dist, 'v1', 'servers.json'), `${JSON.stringify(generate(source), null, 2)}\n`);
     // Pages ignores this when deploying from a workflow, but it documents the host
     fs.copyFileSync(path.join(ROOT, 'CNAME'), path.join(dist, 'CNAME'));
 
-    console.log(`Built ${source.servers.length} server(s) into dist/`);
+    console.log(`Built ${source.servers.length} server(s) and the landing page into dist/`);
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    main().catch((err) => {
+        console.error(`Build failed: ${err.message}`);
+        process.exit(1);
+    });
+}
