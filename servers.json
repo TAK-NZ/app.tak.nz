@@ -1,0 +1,14 @@
+{
+    "servers": [
+        {
+            "name": "TAK.NZ Demo",
+            "url": "map.demo.tak.nz",
+            "logo": "logos/taknz.png"
+        },
+        {
+            "name": "TAK.NZ Test",
+            "url": "map.test.tak.nz",
+            "logo": "logos/taknz.png"
+        }
+    ]
+}

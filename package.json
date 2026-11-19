@@ -1,0 +1,14 @@
+{
+    "name": "app.tak.nz",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Server list and landing page for the TAK.NZ mobile app, published at https://app.tak.nz",
+    "type": "module",
+    "scripts": {
+        "build": "node scripts/build.mjs",
+        "test": "node --test scripts/*.test.mjs"
+    },
+    "engines": {
+        "node": ">=20"
+    }
+}
