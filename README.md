@@ -65,7 +65,7 @@ This matches the format of upstream CloudTAK's registry, so the app reads it unc
 
 Each badge becomes a link on its own as soon as its link is set, and the "not in the stores yet" note disappears when either is.
 
-**Phone picture.** Take two portrait screenshots on a phone, put them in `screens/` as `1.png` and `2.png`, and run `scripts/make-phone-mockup.sh`. It writes `site/images/app-screens.png`, and the page shows it automatically once that file exists (see `screens/README.md`). Until then the section is left out rather than showing a placeholder.
+**Phone picture.** Take two portrait screenshots on a phone, put them in `screens/` as `1.png` and `2.png`, and run `scripts/make-phone-mockup.sh`. It writes `site/images/app-screens.webp`, and the page shows it automatically once that file exists (see `screens/README.md`). Until then the section is left out rather than showing a placeholder.
 
 The badges in `site/images/badges/` are the official App Store and Google Play artwork. Follow Apple's and Google's badge guidelines if you change them.
 

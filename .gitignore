@@ -1,2 +1,5 @@
 dist/
 node_modules/
+# Screenshots are source material. The originals contain personal details and must never be committed
+screens/original/
+screens/*.png

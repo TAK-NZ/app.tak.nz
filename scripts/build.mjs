@@ -127,7 +127,7 @@ async function main() {
     const page = render(
         fs.readFileSync(path.join(ROOT, 'site', 'index.template.html'), 'utf8'),
         extractChrome(taknz),
-        { storeLinks, hasScreenshots: fs.existsSync(path.join(ROOT, 'site', 'images', 'app-screens.png')) },
+        { storeLinks, hasScreenshots: fs.existsSync(path.join(ROOT, 'site', 'images', 'app-screens.webp')) },
     );
 
     const dist = path.join(ROOT, 'dist');

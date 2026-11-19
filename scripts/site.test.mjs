@@ -89,7 +89,7 @@ test('render shows the screenshots when there are some, and drops the note once 
     const template = fs.readFileSync(path.join(ROOT, 'site', 'index.template.html'), 'utf8');
     const page = render(template, extractChrome(fixture), { storeLinks: { appStore: 'https://apps.apple.com/app/id1' }, hasScreenshots: true });
     assert.match(page, /<div class="download-images">/);
-    assert.match(page, /images\/app-screens\.png/);
+    assert.match(page, /images\/app-screens\.webp/);
     assert.doesNotMatch(page, /not in the app stores yet/);
 });
 

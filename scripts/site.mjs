@@ -106,7 +106,7 @@ export function storeBadges(links = {}) {
 export function screenshots(present) {
     if (!present) return '';
     return `<div class="download-images">
-      <img class="download-phones" alt="The TAK.NZ app on two phone screens" src="images/app-screens.png">
+      <img class="download-phones" alt="The TAK.NZ app on two phone screens" src="images/app-screens.webp">
     </div>`;
 }
 
