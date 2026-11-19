@@ -4,7 +4,7 @@ The server list and landing page for the TAK.NZ mobile app, published with GitHu
 
 | URL | What it is |
 |---|---|
-| `https://app.tak.nz/` | Landing page, styled as part of tak.nz (store links will go here) |
+| `https://app.tak.nz/` | Download page, styled as part of tak.nz |
 | `https://app.tak.nz/v1/servers.json` | The list of servers the app offers on first run |
 
 ## Why this exists
@@ -53,13 +53,29 @@ Whoever can merge here decides where users sign in, so a bad entry is a phishing
 
 This matches the format of upstream CloudTAK's registry, so the app reads it unchanged. Installed apps keep calling `/v1/` for years, so never change the meaning of this file. A breaking change goes in a new `/v2/` and `/v1/` keeps being served.
 
+## The download page
+
+`site/index.template.html` is the page. It has the tak.nz logo bar (no menu), the headline, an optional picture of the app on two phones, and the App Store and Google Play badges.
+
+**Store links.** Until the app is published the badges are shown dimmed and are not clickable, with a note saying so. When it is published, put the links in [`site.json`](site.json) (https only) and merge:
+
+```json
+{ "appStore": "https://apps.apple.com/app/id...", "googlePlay": "https://play.google.com/store/apps/details?id=nz.tak.app" }
+```
+
+Each badge becomes a link on its own as soon as its link is set, and the "not in the stores yet" note disappears when either is.
+
+**Phone picture.** Take two portrait screenshots on a phone, put them in `screens/` as `1.png` and `2.png`, and run `scripts/make-phone-mockup.sh`. It writes `site/images/app-screens.png`, and the page shows it automatically once that file exists (see `screens/README.md`). Until then the section is left out rather than showing a placeholder.
+
+The badges in `site/images/badges/` are the official App Store and Google Play artwork. Follow Apple's and Google's badge guidelines if you change them.
+
 ## Keeping the landing page in step with tak.nz
 
 Visitors should not notice they have left <https://tak.nz>, so the landing page does not carry its own design:
 
 - The **header, mobile menu and footer** are copied from the live tak.nz home page at build time (`scripts/site.mjs`), so a new menu item or footer link on the website shows up here on the next build.
 - The **stylesheet, scripts, fonts, logo, icons, photo and hero video** are loaded from tak.nz itself.
-- Only the page content is written here, in `site/index.template.html`.
+- Only the page content is written here, in `site/index.template.html`. The header keeps just the logo: the site menu, the Sign Up / Login buttons and the mobile menu are removed on purpose.
 
 The site is rebuilt on every push, weekly (Mondays), and on demand from the Actions tab. To pick up a website change at once, run the workflow manually.
 

@@ -2,48 +2,55 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>TAK.NZ App - Team Awareness Kit</title>
+  <title>Download the TAK.NZ app</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/png" href="https://tak.nz/images/favicon-32x32.svg">
-  <!-- Same fonts, stylesheet, scripts and images as https://tak.nz, loaded from there so the two stay identical -->
+  <!-- Same fonts and stylesheet as https://tak.nz, loaded from there so the two stay identical -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://tak.nz/assets/css/style.css" rel="stylesheet">
-  <meta name="description" content="The TAK.NZ app. See your team, share information, save lives." />
-  <meta property="og:title" content="TAK.NZ App - Team Awareness Kit"/>
+  <meta name="description" content="Download the TAK.NZ app. See your team, share information, save lives." />
+  <meta property="og:title" content="Download the TAK.NZ app"/>
   <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://app.tak.nz/"/>
-  <meta property="og:description" content="The TAK.NZ app. See your team, share information, save lives."/>
+  <meta property="og:description" content="See your team, share information, save lives."/>
   <meta property="og:image" content="https://tak.nz/images/TAK-NZ-Usage.png"/>
   <meta name="twitter:card" content="summary"/>
+  <style>
+    .download { text-align: center; padding: 3.5rem 0 4rem; }
+    .download h1 { margin: 0 0 .75rem; }
+    .download-text p { font-size: 1.15rem; margin: 0 auto; max-width: 34rem; }
+    .download-images { margin: 2.5rem auto 0; max-width: 600px; }
+    .download-phones { display: block; width: 100%; height: auto; }
+    .download-cta { margin-top: 2.5rem; }
+    .store-badges { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 1rem; }
+    .store-badge-link { display: inline-flex; align-items: center; }
+    .store-badge { display: block; height: 56px; width: auto; }
+    .store-badge[src$=".png"] { height: 80px; margin: -12px; }
+    .store-badge-link--soon { opacity: .45; cursor: default; filter: grayscale(.4); }
+    .download-note { margin: 1.25rem 0 0; color: #5c5a5a; }
+  </style>
 </head>
-<body class='page page-home'>
-  <!--MOBILE_MENU-->
+<body class='page page-basic'>
   <div id="wrapper" class="wrapper">
     <!--HEADER-->
-    <div class="intro">
+    <div class="download">
       <div class="container">
-        <div class="row justify-content-start">
-          <div class="col-12 col-md-7 col-lg-6 order-2 order-md-1">
-            <h1>TAK.NZ in your <span style="color:#004499"><em>pocket</em></span>.</h1>
-            <p><strong>See your team, share information, save lives.</strong> The TAK.NZ app puts the same real-time location data and unified operational view on your phone, wherever the response takes you.</p>
-            <!-- Store badges go here once the app is published:
-                 <p><a class="button" href="https://play.google.com/...">Google Play</a> <a class="button" href="https://apps.apple.com/...">App Store</a></p> -->
-            <p>The app is not in the app stores yet. Download links will appear here.</p>
-            <p><a class="button-outline" href="https://tak.nz/about/">About TAK.NZ</a></p>
+        <div class="download-text">
+          <h1>Download the <span style="color:#004499"><em>TAK.NZ</em></span> app</h1>
+          <p>See your team, share information, save lives.</p>
+        </div>
+        <!--SCREENSHOTS-->
+        <div class="download-cta">
+          <div class="store-badges">
+        <!--STORE_BADGES-->
           </div>
-          <div class="col-12 col-md-5 col-lg-6 order-1 order-md-2 position-relative">
-            <video class="intro-video" autoplay muted loop playsinline aria-hidden="true" poster="https://tak.nz/images/TAK-NZ-Usage.png">
-              <source src="https://tak.nz/videos/background_video_sequence.mp4" type="video/mp4" />
-            </video>
-            <img alt="Team Awareness Kit - Te mōhio o te rōpū" class="intro-image intro-video-fallback" src="https://tak.nz/images/TAK-NZ-Usage.png" />
-          </div>
+          <!--COMING_SOON-->
         </div>
       </div>
     </div>
   </div>
   <!--FOOTER-->
-  <script type="text/javascript" src="https://tak.nz/assets/js/scripts.js"></script>
 </body>
 </html>

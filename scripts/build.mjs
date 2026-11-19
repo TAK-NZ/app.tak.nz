@@ -123,9 +123,11 @@ async function main() {
     const taknz = process.env.TAKNZ_PAGE
         ? fs.readFileSync(path.resolve(process.env.TAKNZ_PAGE), 'utf8')
         : await fetchSitePage();
+    const storeLinks = JSON.parse(fs.readFileSync(path.join(ROOT, 'site.json'), 'utf8'));
     const page = render(
         fs.readFileSync(path.join(ROOT, 'site', 'index.template.html'), 'utf8'),
         extractChrome(taknz),
+        { storeLinks, hasScreenshots: fs.existsSync(path.join(ROOT, 'site', 'images', 'app-screens.png')) },
     );
 
     const dist = path.join(ROOT, 'dist');

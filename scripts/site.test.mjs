@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { extractBlock, absolutize, extractChrome, render } from './site.mjs';
+import { extractBlock, absolutize, extractChrome, render, stripNavigation, storeBadges } from './site.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fixture = fs.readFileSync(path.join(ROOT, 'scripts', 'fixtures', 'taknz-home.html'), 'utf8');
@@ -27,11 +27,9 @@ test('absolutize points root-relative links, images and css urls at tak.nz', () 
     assert.match(out, /href="\/\/cdn\.example\/x"/);
 });
 
-test('extracts the mobile menu, header and footer from the tak.nz markup', () => {
+test('extracts the header and footer from the tak.nz markup', () => {
     const chrome = extractChrome(fixture);
-    assert.match(chrome.mobileMenu, /id="main-menu-mobile"/);
     assert.match(chrome.header, /class='header'/);
-    assert.match(chrome.header, /toggle-main-menu-mobile/);
     assert.match(chrome.footer, /^<footer/);
     assert.match(chrome.footer, /<\/footer>$/);
     for (const part of Object.values(chrome)) {
@@ -44,17 +42,59 @@ test('the header links back to tak.nz', () => {
     assert.match(header, /href="https:\/\/tak\.nz\/"/);
 });
 
-test('render fills the real template and leaves nothing relative', () => {
+test('stripNavigation keeps the logo and removes the menu, buttons and hamburger', () => {
+    const { header } = extractChrome(fixture);
+    assert.match(header, /main-menu/);
+    assert.match(header, /Login/);
+    const stripped = stripNavigation(header);
+    assert.match(stripped, /class="logo"/);
+    assert.match(stripped, /logo\.svg/);
+    assert.doesNotMatch(stripped, /main-menu/);
+    assert.doesNotMatch(stripped, /toggle-main-menu-mobile|hamburger/);
+    assert.doesNotMatch(stripped, /Sign Up|Login|About|Technology/);
+    // Still well formed: the header's own wrapper closes
+    assert.equal((stripped.match(/<div/g) || []).length, (stripped.match(/<\/div>/g) || []).length);
+});
+
+test('a store without a link is shown dimmed and not clickable', () => {
+    const html = storeBadges({});
+    assert.doesNotMatch(html, /<a /);
+    assert.match(html, /store-badge-link--soon/);
+    assert.match(html, /App Store \(coming soon\)/);
+    assert.match(html, /Google Play \(coming soon\)/);
+});
+
+test('a store with a link becomes a link, and only https is accepted', () => {
+    const html = storeBadges({ appStore: 'https://apps.apple.com/app/id1', googlePlay: null });
+    assert.match(html, /<a class="store-badge-link"[^>]*href="https:\/\/apps\.apple\.com\/app\/id1"/);
+    assert.match(html, /rel="noopener"/);
+    assert.match(html, /Google Play \(coming soon\)/);
+    assert.throws(() => storeBadges({ googlePlay: 'http://play.google.com/x' }), /https/);
+    assert.throws(() => storeBadges({ appStore: 'javascript:alert(1)' }), /https/);
+});
+
+test('render builds the real template without navigation, and leaves nothing relative', () => {
     const template = fs.readFileSync(path.join(ROOT, 'site', 'index.template.html'), 'utf8');
-    const page = render(template, extractChrome(fixture));
-    assert.match(page, /id="main-menu-mobile"/);
+    const page = render(template, extractChrome(fixture), { storeLinks: {}, hasScreenshots: false });
     assert.match(page, /<footer/);
-    assert.doesNotMatch(page, /<!--(MOBILE_MENU|HEADER|FOOTER)-->/);
+    assert.doesNotMatch(page, /<!--[A-Z_]+-->/);
+    assert.doesNotMatch(page, /main-menu|Sign Up|Login/);
     assert.match(page, /https:\/\/tak\.nz\/assets\/css\/style\.css/);
+    assert.match(page, /Download the/);
+    assert.match(page, /not in the app stores yet/);
+    assert.doesNotMatch(page, /<div class="download-images">/);
+});
+
+test('render shows the screenshots when there are some, and drops the note once published', () => {
+    const template = fs.readFileSync(path.join(ROOT, 'site', 'index.template.html'), 'utf8');
+    const page = render(template, extractChrome(fixture), { storeLinks: { appStore: 'https://apps.apple.com/app/id1' }, hasScreenshots: true });
+    assert.match(page, /<div class="download-images">/);
+    assert.match(page, /images\/app-screens\.png/);
+    assert.doesNotMatch(page, /not in the app stores yet/);
 });
 
 test('render refuses a template missing a marker, or with a relative link', () => {
     const chrome = extractChrome(fixture);
-    assert.throws(() => render('<!--HEADER--><!--FOOTER-->', chrome), /MOBILE_MENU/);
-    assert.throws(() => render('<!--MOBILE_MENU--><!--HEADER--><!--FOOTER--><a href="/x">x</a>', chrome), /not absolute/);
+    assert.throws(() => render('<!--HEADER--><!--FOOTER--><!--STORE_BADGES-->', chrome), /SCREENSHOTS/);
+    assert.throws(() => render('<!--HEADER--><!--FOOTER--><!--STORE_BADGES--><!--SCREENSHOTS--><a href="/x">x</a>', chrome), /not absolute/);
 });

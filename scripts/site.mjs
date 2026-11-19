@@ -55,7 +55,6 @@ export function absolutize(html, origin = SITE_ORIGIN) {
 /** Pull the shared page furniture out of the tak.nz home page */
 export function extractChrome(html) {
     const chrome = {
-        mobileMenu: extractBlock(html, /<div[^>]*\bid=["']main-menu-mobile["'][^>]*>/i, 'div', 'mobile menu'),
         header: extractBlock(html, /<div[^>]*\bclass=["']header["'][^>]*>/i, 'div', 'header'),
         footer: extractBlock(html, /<footer[^>]*>/i, 'footer', 'footer'),
     };
@@ -64,16 +63,68 @@ export function extractChrome(html) {
     return chrome;
 }
 
-/** Fill the page template with the tak.nz header, mobile menu and footer */
-export function render(template, chrome) {
-    for (const marker of ['<!--MOBILE_MENU-->', '<!--HEADER-->', '<!--FOOTER-->']) {
+/**
+ * The mobile app page is a download page, not a way around the website, so the
+ * header keeps only the logo. The site menu, the Sign Up / Login buttons and the
+ * hamburger that opens the mobile menu are removed.
+ */
+export function stripNavigation(header) {
+    let out = header;
+    const remove = [
+        [/<div[^>]*\bid=["']main-menu["'][^>]*>/i, 'div', 'site menu'],
+        [/<button[^>]*\bid=["']toggle-main-menu-mobile["'][^>]*>/i, 'button', 'menu button'],
+    ];
+    for (const [pattern, tag, name] of remove) {
+        out = out.replace(extractBlock(out, pattern, tag, name), '');
+    }
+    return out;
+}
+
+const APP_STORE_ALT = 'Download on the App Store';
+const GOOGLE_PLAY_ALT = 'Get it on Google Play';
+
+/**
+ * Store badges. A store that has no link yet shows its badge dimmed and unclickable,
+ * so the page is honest about the app not being published rather than linking nowhere.
+ */
+export function storeBadges(links = {}) {
+    const badge = (href, src, alt, name) => {
+        const img = `<img class="store-badge" alt="${alt}" src="${src}">`;
+        if (href) {
+            if (!/^https:\/\//.test(href)) throw new Error(`The ${name} link must be an https URL`);
+            return `<a class="store-badge-link" target="_blank" rel="noopener" href="${href.replace(/"/g, '&quot;')}">${img}</a>`;
+        }
+        return `<span class="store-badge-link store-badge-link--soon" role="img" aria-label="${alt} (coming soon)">${img}</span>`;
+    };
+
+    return [
+        badge(links.appStore, 'images/badges/app-store.svg', APP_STORE_ALT, 'App Store'),
+        badge(links.googlePlay, 'images/badges/google-play.png', GOOGLE_PLAY_ALT, 'Google Play'),
+    ].join('\n        ');
+}
+
+export function screenshots(present) {
+    if (!present) return '';
+    return `<div class="download-images">
+      <img class="download-phones" alt="The TAK.NZ app on two phone screens" src="images/app-screens.png">
+    </div>`;
+}
+
+/** Fill the page template with the tak.nz header and footer, the store badges and the screenshots */
+export function render(template, chrome, options = {}) {
+    for (const marker of ['<!--HEADER-->', '<!--FOOTER-->', '<!--STORE_BADGES-->', '<!--SCREENSHOTS-->']) {
         if (!template.includes(marker)) throw new Error(`Template is missing ${marker}`);
     }
 
+    const links = options.storeLinks || {};
+    const published = Boolean(links.appStore || links.googlePlay);
+
     const page = template
-        .replace('<!--MOBILE_MENU-->', () => chrome.mobileMenu)
-        .replace('<!--HEADER-->', () => chrome.header)
-        .replace('<!--FOOTER-->', () => chrome.footer);
+        .replace('<!--HEADER-->', () => stripNavigation(chrome.header))
+        .replace('<!--FOOTER-->', () => chrome.footer)
+        .replace('<!--STORE_BADGES-->', () => storeBadges(links))
+        .replace('<!--SCREENSHOTS-->', () => screenshots(options.hasScreenshots))
+        .replace('<!--COMING_SOON-->', () => published ? '' : '<p class="download-note">The app is not in the app stores yet. Download links will appear here.</p>');
 
     // Anything still pointing at "/" would resolve on this host and 404
     const stray = page.match(/\b(?:href|src)=["']\/(?!\/)[^"']*/g);
